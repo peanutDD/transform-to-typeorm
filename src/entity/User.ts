@@ -1,7 +1,7 @@
-import { Entity, Column, Index, BeforeInsert } from "typeorm";
+import { Entity, Column, Index, BeforeInsert, OneToMany } from "typeorm";
 import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
 import { IsEqual } from "../utils/validators/decorators/IsEqual";
-import { IsUserAlreadyExist } from "../utils/validators/decorators/IsUserAlreadyExist";
+import { IsUserAlreadyExist, IsEmailAlreadyExist } from "../utils/validators/decorators/IsAlreadyExist";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config/config";
@@ -10,6 +10,8 @@ import config from "../config/config";
 import { JwtPayload } from "../types/Jwt";
 import { Exclude } from "class-transformer";
 import Base from "./Base";
+import { Post } from "./Post";
+import { Comment } from "./Comment";
 
 @Entity("users")
 export class User extends Base {
@@ -25,6 +27,9 @@ export class User extends Base {
 	@Column()
 	@IsNotEmpty()
 	@IsEmail()
+	@IsEmailAlreadyExist(false, {
+		message: "Email $value already exists. Choose another email.",
+	})
 	email: string;
 
 	@IsNotEmpty()
@@ -48,15 +53,15 @@ export class User extends Base {
 		});
 	}
 
-	// @OneToMany(
-	//   () => Post,
-	//   post => post.user
-	// )
-	// posts: Post[];
+	@OneToMany(
+	  () => Post,
+	  post => post.user
+	)
+	posts: Post[];
 
-	// @OneToMany(
-	//   () => Comment,
-	//   comment => comment.user
-	// )
-	// comments: Comment[];
+	@OneToMany(
+	  () => Comment,
+	  comment => comment.user
+	)
+	comments: Comment[];
 }
